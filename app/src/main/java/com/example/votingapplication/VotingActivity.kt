@@ -41,7 +41,7 @@ class VotingActivity : AppCompatActivity() {
                 if (hasVoted > 0) {
                     // User has already voted
                     Toast.makeText(this@VotingActivity, "You have already voted", Toast.LENGTH_SHORT).show()
-                    finish()
+                    finishAffinity()
                 } else {
                     // User has not voted, allow voting
                     setupVoting()
