@@ -10,16 +10,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.example.votingapplication.RoomDb.AppDatabase
 import com.example.votingapplication.RoomDb.Vote
 import com.example.votingapplication.RoomDb.VoteDao
 import kotlinx.coroutines.launch
 
+
 class VotingActivity : AppCompatActivity() {
 
     private lateinit var voteDao: VoteDao
     private var userId: Int = 0
+    lateinit var voteButton: androidx.appcompat.widget.AppCompatButton
+    lateinit var backbtn :androidx.appcompat.widget.AppCompatButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +35,13 @@ class VotingActivity : AppCompatActivity() {
             insets
         }
 
+        voteButton = findViewById(R.id.Vote)
+        backbtn = findViewById(R.id.back)
+        backbtn.setOnClickListener{
+            val intent = Intent (this@VotingActivity, MainActivity::class.java)
+           startActivity(intent)
+        }
+
         userId = intent.getIntExtra("USER_ID", 0)
         val db = AppDatabase.getDatabase(applicationContext)
         voteDao = db.voteDao()
@@ -40,8 +51,14 @@ class VotingActivity : AppCompatActivity() {
                 val hasVoted = voteDao.hasVoted(userId)
                 if (hasVoted > 0) {
                     // User has already voted
+                    val vote = voteDao.getVoteByUserId(userId)
+                    if (vote != null) {
+                        disableAllRadioButtons(vote.candidate)
+                        // Freeze the radio button corresponding to the voted candidate
+                        freezeVotedCandidate(vote.candidate)
+                    }
                     Toast.makeText(this@VotingActivity, "You have already voted", Toast.LENGTH_SHORT).show()
-                    finishAffinity()
+                    voteButton.isVisible = false
                 } else {
                     // User has not voted, allow voting
                     setupVoting()
@@ -55,7 +72,6 @@ class VotingActivity : AppCompatActivity() {
 
     private fun setupVoting() {
         val radioGroup = findViewById<RadioGroup>(R.id.radioGroup)
-        val voteButton = findViewById<Button>(R.id.Vote)
         val backButton = findViewById<Button>(R.id.back)
 
         backButton.setOnClickListener {
@@ -77,6 +93,7 @@ class VotingActivity : AppCompatActivity() {
                     // Insert vote into database
                     val vote = Vote(0, userId, selectedCandidate)
                     voteDao.insert(vote)
+
                     Toast.makeText(this@VotingActivity, "Vote cast successfully", Toast.LENGTH_SHORT).show()
                     // After voting, show message and redirect back to MainActivity
                     val intent = Intent(this@VotingActivity, MainActivity::class.java)
@@ -89,4 +106,27 @@ class VotingActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun freezeVotedCandidate(candidate: String) {
+        val radioGroup = findViewById<RadioGroup>(R.id.radioGroup)
+        for (i in 0 until radioGroup.childCount) {
+            val radioButton = radioGroup.getChildAt(i) as RadioButton
+            if (radioButton.text == candidate) {
+                radioButton.isChecked = true
+                radioButton.isEnabled = false
+            }
+        }
+    }
+
+    private fun disableAllRadioButtons(votedCandidate: String) {
+        val radioGroup = findViewById<RadioGroup>(R.id.radioGroup)
+        for (i in 0 until radioGroup.childCount) {
+            val radioButton = radioGroup.getChildAt(i) as RadioButton
+            if (radioButton.text == votedCandidate) {
+                radioButton.isChecked = true
+            }
+            radioButton.isEnabled = false
+        }
+    }
 }
+

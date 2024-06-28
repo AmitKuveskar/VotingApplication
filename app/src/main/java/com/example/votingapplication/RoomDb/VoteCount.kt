@@ -4,8 +4,11 @@ import androidx.room.ColumnInfo
 
 data class VoteCount(
 
-@ColumnInfo(name = "candidate") val candidate: String,
-@ColumnInfo(name = "voteCount") val voteCount: Int
+@ColumnInfo(name = "candidate")
+val candidate: String,
+
+@ColumnInfo(name = "voteCount")
+val voteCount: Int
 )
 
 

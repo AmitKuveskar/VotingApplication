@@ -55,9 +55,6 @@ class MainActivity : AppCompatActivity() {
                     val admin = userDao.getAdmin(username, password)
                     val user = userDao.getUser(username, password)
 
-                    Log.d("MainActivity", "Admin: $admin")
-                    Log.d("MainActivity", "User: $user")
-
                     if (admin != null && admin.username == "admin" && admin.password == "admin") {
                         Log.d("MainActivity", "Admin login successful")
                         val intent = Intent(this@MainActivity, AdminActvity::class.java)
